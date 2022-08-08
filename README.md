@@ -34,9 +34,14 @@ This file contains the details of all the individuals that contributed to this s
 Features
 
 1.Display a prompt and wait for the user to type a command. A command-line always ends with a new line.
+
 2.The prompt is displayed again each time a command has been executed.
+
 3.The command lines are simple, no semicolons, no pipes, no redirections, or any other advanced features.
-4.The command lines are made only of one word.No arguement will be passed to the programs. 5.If an executable is not found the shell prints an error message and displayu the prompt again.
+
+4.The command lines are made only of one word.No arguement will be passed to the programs.
+
+5.If an executable is not found the shell prints an error message and displays the prompt again.
 
 Credits
 
