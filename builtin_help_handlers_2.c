@@ -1,12 +1,7 @@
 #include "shell.h"
 
-void help_env(void);
-void help_setenv(void);
-void help_unsetenv(void);
-void help_history(void);
-
 /**
- * help_env - Displays information on the shellby builtin command 'env'.
+ * help_env - Displays information on the shell by builtin command 'env'
  */
 void help_env(void)
 {
@@ -16,7 +11,7 @@ void help_env(void)
 }
 
 /**
- * help_setenv - Displays information on the shellby builtin command 'setenv'.
+ * help_setenv - Displays information on the shell by builtin command 'setenv'
  */
 void help_setenv(void)
 {
@@ -31,7 +26,7 @@ void help_setenv(void)
 
 /**
  * help_unsetenv - Displays information on the shellby builtin command
- * 'unsetenv'.
+ * 'unsetenv'
  */
 void help_unsetenv(void)
 {
@@ -42,4 +37,30 @@ void help_unsetenv(void)
 	write(STDOUT_FILENO, msg, _strlen(msg));
 	msg = "message to stderr.\n";
 	write(STDOUT_FILENO, msg, _strlen(msg));
+}
+/**
+ * display_help - display help for builtin commands
+ * @cmd: parsed command
+ * @st: Status of last command executed
+ * Return: 0 Success
+ */
+int display_help(char **cmd, __attribute__((unused))int st)
+{
+	if (!cmd[1])
+		help_all();
+	else if (_strcmp(cmd[1], "alias") == 0)
+		help_alias();
+	else if (_strcmp(cmd[1], "cd") == 0)
+		help_cd();
+	else if (_strcmp(cmd[1], "exit") == 0)
+		help_exit();
+	else if (_strcmp(cmd[1], "env") == 0)
+		help_env();
+	else if (_strcmp(cmd[1], "setenv") == 0)
+		help_setenv();
+	else if (_strcmp(cmd[1], "unsetenv") == 0)
+		help_unsetenv();
+	else if (_strcmp(cmd[1], "help") == 0)
+		help_help();
+	return (0);
 }

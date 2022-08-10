@@ -1,141 +1,141 @@
-#ifndef _SHELL_H
-#define _SHELL_H
+#ifndef SHELL_H
+#define SHELL_H
 
-/*
- * File: shell.h
- * Auth: Debs Utomi
- *       Addisu Dabale Gonfa
- */
+/***** MACROS *****/
 
-#include <fcntl.h>
-#include <signal.h>
+#define PRINT(c) (write(STDERR_FILENO, c, _strlen(c)))
+#define BUFSIZE 10240
+#define DELIMITER " \t\r\n\a"
+
+/*** STANDARD LIBRARIES ***/
+
+#include <stdio.h>
+#include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
-#include <stdio.h>
+#include <linux/limits.h>
 
-#define END_OF_FILE -2
-#define EXIT -3
+/******** STRING HANDLER FUNCTIONS **********/
 
-/* Global environemnt */
-extern char **environ;
-/* Global program name */
-char *name;
-/* Global history counter */
-int hist;
-
-/**
- * struct list_s - A new struct type defining a linked list.
- * @dir: A directory path.
- * @next: A pointer to another struct list_s.
- */
-typedef struct list_s
-{
-	char *dir;
-	struct list_s *next;
-} list_t;
-
-/**
- * struct builtin_s - A new struct type defining builtin commands.
- * @name: The name of the builtin command.
- * @f: A function pointer to the builtin command's function.
- */
-typedef struct builtin_s
-{
-	char *name;
-	int (*f)(char **argv, char **front);
-} builtin_t;
-
-/**
- * struct alias_s - A new struct defining aliases.
- * @name: The name of the alias.
- * @value: The value of the alias.
- * @next: A pointer to another struct alias_s.
- */
-typedef struct alias_s
-{
-	char *name;
-	char *value;
-	struct alias_s *next;
-} alias_t;
-
-/* Global aliases linked list */
-alias_t *aliases;
-
-/* Main Helpers */
-ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
-void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
-char **_strtok(char *line, char *delim);
-char *get_location(char *command);
-list_t *get_path_dir(char *path);
-int execute(char **args, char **front);
-void free_list(list_t *head);
-char *_itoa(int num);
-
-/* Input Helpers */
-void handle_line(char **line, ssize_t read);
-void variable_replacement(char **args, int *exe_ret);
-char *get_args(char *line, int *exe_ret);
-int call_args(char **args, char **front, int *exe_ret);
-int run_args(char **args, char **front, int *exe_ret);
-int handle_args(int *exe_ret);
-int check_args(char **args);
-void free_args(char **args, char **front);
-char **replace_aliases(char **args);
-
-/* String functions */
-int _strlen(const char *s);
-char *_strcat(char *dest, const char *src);
-char *_strncat(char *dest, const char *src, size_t n);
-char *_strcpy(char *dest, const char *src);
-char *_strchr(char *s, char c);
-int _strspn(char *s, char *accept);
+char *_strncpy(char *dest, char *src, int n);
+int _strlen(char *s);
+int _putchar(char c);
+int _atoi(char *s);
+void _puts(char *str);
 int _strcmp(char *s1, char *s2);
+int _isalpha(int c);
+void array_rev(char *arr, int len);
+int intlen(int num);
+char *_itoa(unsigned int n);
+char *_strcat(char *dest, char *src);
+char *_strcpy(char *dest, char *src);
+char *_strchr(char *s, char c);
 int _strncmp(const char *s1, const char *s2, size_t n);
+char *_strdup(char *str);
 
-/* Builtins */
-int (*get_builtin(char *command))(char **args, char **front);
-int shellby_exit(char **args, char **front);
-int shellby_env(char **args, char __attribute__((__unused__)) **front);
-int shellby_setenv(char **args, char __attribute__((__unused__)) **front);
-int shellby_unsetenv(char **args, char __attribute__((__unused__)) **front);
-int shellby_cd(char **args, char __attribute__((__unused__)) **front);
-int shellby_alias(char **args, char __attribute__((__unused__)) **front);
-int shellby_help(char **args, char __attribute__((__unused__)) **front);
+/*********** MEMORY HANDLERS ***********/
 
-/* Builtin Helpers */
-char **_copyenv(void);
-void free_env(void);
-char **_getenv(const char *var);
+void free_env(char **env);
+void *fill_an_array(void *a, int el, unsigned int len);
+char *_memcpy(char *dest, char *src, unsigned int n);
+void *_calloc(unsigned int size);
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
+void free_all(char **input, char *line);
 
-/* Error Handling */
-int create_error(char **args, int err);
-char *error_env(char **args);
-char *error_1(char **args);
-char *error_2_exit(char **args);
-char *error_2_cd(char **args);
-char *error_2_syntax(char **args);
-char *error_126(char **args);
-char *error_127(char **args);
+/****** MISCELLANEOUS AND INPUT FUNCTIONS *******/
 
-/* Linkedlist Helpers */
-alias_t *add_alias_end(alias_t **head, char *name, char *value);
-void free_alias_list(alias_t *head);
-list_t *add_node_end(list_t **head, char *dir);
-void free_list(list_t *head);
+char *_getline();
+char *space(char *str);
+char *enter(char *string);
+void hashtag_handler(char *buff);
+void prompt(void);
+unsigned int check_delim(char c, const char *str);
+char *_strtok(char *str, const char *delim);
+int history(char *input);
+char **separator(char *input);
 
+/****** FILE ARGUMENT HANDLER FUNCTIONS ******/
+
+void read_file(char *file, char **argv);
+void treat_file(char *line, int count, FILE *fp, char **argv);
+void exit_bul_for_file(char **cmd, char *line, FILE *fd);
+
+/****** PARSED ARGUMENT HANDLER FUNCTIONS *****/
+
+char **parse_cmd(char *input);
+int handle_builtin(char **cmd, int er);
+int check_cmd(char **cmd, char *input, int c, char **argv);
+void signal_to_handle(int sig);
+
+/******* ERROR HANDLERS ******/
+
+void print_error(char *input, int counter, char **argv);
+void _prerror(char **argv, int c, char **cmd);
+void error_file(char **argv, int c);
+
+/****** ENVIRONMENT HANDLERS ******/
+
+extern char **environ;
+void create_envi(char **envi);
+void free_env(char **env);
+
+/****** PRINTING FUNCTIONS *****/
+
+void print_number(unsigned int n);
+void print_number_int(int n);
+int print_echo(char **cmd);
+
+/******* PATH FINDER *******/
+
+int path_cmd(char **cmd);
+char *build(char *token, char *value);
+char *_getenv(char *name);
+
+/******* HELP HANDLERS *******/
+
+void help_env(void);
+void help_setenv(void);
+void help_unsetenv(void);
+void help_history(void);
 void help_all(void);
 void help_alias(void);
 void help_cd(void);
 void help_exit(void);
 void help_help(void);
-void help_env(void);
-void help_setenv(void);
-void help_unsetenv(void);
-void help_history(void);
+int display_help(char **cmd, __attribute__((unused))int st);
 
-int proc_file_commands(char *file_path, int *exe_ret);
-#endif /* _SHELL_H*/
+/****** BUILTIN COMMAND HANDLERS AND EXECUTE ******/
+
+int check_builtin(char **cmd);
+int handle_builtin(char **cmd, int st);
+void exit_bul(char **cmd, char *input, char **argv, int c,
+		int stat);
+int change_dir(char **cmd, __attribute__((unused))int st);
+int dis_env(__attribute__((unused)) char **cmd,
+		__attribute__((unused)) int st);
+int echo_bul(char **cmd, int st);
+int history_dis(__attribute__((unused))char **c,
+		__attribute__((unused)) int st);
+
+/****** BUILT-IN COMMANDS STRUCT *****/
+
+/**
+ * struct _builtin - Defines a struct that conatins built-in commands
+ * with their respective implementation functions
+ * @command: - Built-in command
+ * @function: - Pointer to custom functions that have
+ * similar functionalities as the built-in commands
+ */
+typedef struct _builtin
+{
+	char *command;
+	int (*function)(char **line, int st);
+} builtin;
+
+#endif /*SHELL_H*/

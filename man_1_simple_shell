@@ -1,180 +1,275 @@
-.TH SHELLBY 1 "June 2022" "ALX Low Level  Programming" "0x15. C - Simple Shell"
-.SH NAME
-.B shellby\fR \- simple UNIX command interpreter
+." Process this file with
+." groff -man -Tascii man_1_simple_shell
+." Render on terminal with
+." man ./man_1_simple_shell or viewman
+."
+.TH SIMPLE_SHELL 1 "2021 August 26" "v 1.0" "General Commands Manual"
+
+.SH  NAME
+simple_shell \- Simple command interpreter (shell)
 .SH SYNOPSIS
-.B shellby\fR [\fIfilename\fR]
+.B simple_shell
+[file]
+
 .SH DESCRIPTION
-.B Shellby\fR is a simple UNIX command language interpreter that reads commands from either a file or standard input and executes them.
+SImple SHell is a command language interpreter that executes
+commands read from the standard input or from a file.
 
-.B Invocation
-.in +2n
-\fBShellby\fR can be invoked both interactively and non-interactively.
-If \fBshellby\fR is invoked with standard input not connected to a terminal, it reads and executes received commands in order.
+.SH ARGUMENTS
+The only argument that should be supplied to the shell
+is the name of a file. When this happens,
+the shell reads and	executes commands from this	file, then exits.
+The shell's exit status is the exit status of the last command
+executed in the script. If no commands are executed, the exit
+status is 0. An attempt is made to open the file in
+the current directory.
+." and, if no file is found,	then the shell searches	the
+." directories	in PATH	for the	script.
 
-If \fBshellby\fR is invoked with standard input connected to a terminal (determined by \fIisatty(3)\fR), an \fIinteractive\fR shell is opened.
-When executing interactively, \fBshellby\fR displays the prompt \fI$ \fR when it is ready to read a command.
+.SH DEFINITIONS
+.PP
+The following definitions are used throughout the rest of this
+document.
+.PD 0
+.TP
+.B blank
+A space or tab.
+.TP
+.B word
+A sequence of characters considered as a single unit by the shell.
+.TP
+.B name
+A
+.I word
+consisting only of alphanumeric characters and underscores, and beginning with an alphabetic character or an underscore.
+.TP
+.B control operator
+A
+.I token
+that performs a control function. It is one of the
+following symbols:
+.if t \fB|| && ; <newline>
 
-Alternatively, if command line arguments are supplied upon invocation, \fBshellby\fR treats the first argument as a file from which to read commands.
-The supplied file should contain one command per line.
-.B Shellby\fR runs each of the commands contained in the file in order before exiting.
-.in
+.SH SHELL GRAMMAR
+.SS Simple Commands
+A
+.I simple command
+is a sequence of
+.B blank
+-separated words that are terminated by a
+.I control operator
+. The first word specifies the command to be
+executed, and is passed as argument zero. The
+remaining words are passed as arguments to the
+invoked command.
 
-.B Environment
-.in +2n
-Upon invocation, \fBshellby\fR receives and copies the environment of the parent process in which it was exeucted.
-This \fBenvironment\fR is an array of \fIname-value\fR strings describing variables in the format \fINAME=VALUE\fR.
-.in
+.Br
+The return value of a
+.I simple command
+is its exit status or 128+
+.I n
+if the command is terminated by signal
+.I n
 
-.B Command Execution
-.in +2n
-After receiving a command, \fBshellby\fR tokenizes it into words using \fB" "\fR as a delimiter.
-The first word is considered the command and all remaining words are considered arguments to that command.
-.B Shellby\fR then proceeds with the following actions:
+.SH COMMENTS
+In a non-interactive shell or an interactive shell, a word beginning
+with a
+.B #
+causes that word and all remaining characters on that line to be ignored.
+Comments are on by default.
 
-.RS
-1. If the first character of the command is neither a slash (\fI\\\fR) nor dot (\fI.\fR), the shell searches for it in the list of shell builtins.
-If there exists a shell builtin by that name, the builtin is invoked.
-.RE
+.SH QUOTING
+.I Quoting
+is used to remove the special meaning of certain characters or
+words to the shell, such as operators or whitespace.
+There are two types of quoting: matched single quotes,
+and matched double quotes.
 
-.RS
-2. If the first character of the command is none of a slash (\fI\\\fR), dot (\fI.\fR), nor builtin, \fBshellby\fR searches each element of the
-\fBPATH\fR environmental variable for a directory containing an executable file by that name.
-.RE
+.SS Single Quotes
+Enclosing characters in single quotes preserves the literal meaning of all
+the characters (except single quotes, making it impossible to put
+single-quotes in a single-quoted string).
 
-.RS
-3. If the first character of the command is a slash (\fI\\\fR) or dot (\fI.\fR) or either of the above searches was successful,
-the shell executes the named program with any remaining arguments given in a separate execution environment.
-.RE
+.SS Double Quotes
+Enclosing characters within double quotes preserves the literal
+meaning of all characters except dollarsign as they're used to signify
+the start of a variable or special parameters like ? and $.
 
-.B Exit Status
-.in +2n
-.B Shellby\fR returns the exit status of the last command executed, unless a syntax error occurs, with zero indicating success and non-zero indicating failure.
+.SH ALIASES
+An alias is a name and corresponding value set using the alias builtin command.
+Whenever a word is read, the shell
+checks the word to see if it matches an alias.
+If it does, it replaces it in the input stream with its value.
+For example, if there is an alias called
+"put"
+with the value
+.Dq "echo -e" ,
+then the input:
+.Pp
+.Dl put "\e[31mCool\e[0m" Aq return
+.Pp
+would become
+.Pp
+.Dl echo -e "\e[31mCool\e[0m" Aq return
+.Pp
+Aliases provide a convenient way for naive users to create shorthands for
+commands.
+They can also be used to create lexically obscure code.
+This use is discouraged.
 
-If a command is not found, the return status is 127; if a command is found but is not executable, the return status is 126.
+.SH SIGNALS
+When
+.B simple_shell
+is interactive, it catches and handles
+.B SIGINT
+(so that pressing Control+C does not kill an interactive shell).
 
-All builtins return zero on success and one or two on incorrect usage (indicated by a corresponding error message).
-.in
+.SH HISTORY
+On startup, the history is initialized from the file .simple_shell_history in the $HOME directory.
+This file is truncated to
+contain no more than 4096 lines of command strings. When the shell startsup,
+the first line number is set to  the number of lines in the .simple_shell_history file modulo 4096
+(the history size).
+ If the history file is unwritable, the history is not saved.
 
-.B Signals
-.in +2n
-While running in interactive mode, \fBshellby\fR ignores the keyboard input \fBCtrl+c\fR.
-Alternatively, an input of end-of-file (\fBCtrl+d\fR) will exit the program.
-.in
-
-.B Variable Replacement
-.in +2n
-.B Shellby\fR inerprets the \fI$\fR character for variable replacement:
-
-.RS
-.B $ENV_VARIABLE\fR	\fIENV_VARIABLE\fR is subsituted with its value.
-.RE
-
-.RS
-.B $?\fR			\fI?\fR is substituted with the return value of the last program executed.
-.RE
-
-.RS
-.B $$\FR			The second \fI$\fR is substituted with the current process ID.
-.RE
-
-.B Comments
-.in +2n
-.B Shellby\fR ignores all words and characters preceeded by a \fI#\fR character on a line.
-.in
-
-.B Operators
-.in +2n
-
-.RS
-.B ;\fR - Command separator
-.RS
-Commands separated by a \fI;\fR are executed sequentially.
-.RE
-
-.B &&\fR - AND logical operator
-.RS
-.I command1\fR && \fIcommand2\fR: \fIcommand2\fR is executed if, and only if, \fIcommand1\fR returns an exit status of zero.
-.RE
-
-.B ||\fR - OR logical operator
-.RS
-.I command1\fR || \fIcommand2\fR: \fIcommand2\fR is executed if, and only if, \fIcommand1\fR returns a non-zero exit status.
-.RE
-
-The operators \fI&&\fR and \fI||\fR have equal precedence, followed by \fI;\fR.
-.RE
-
-.B Shellby Builtin Commands
-.in +2n
-
-.RS
-.B cd
-.RS
-Usage: .B cd [DIRECTORY]
-
-Changes the current directory of the process to \fBDIRECTORY\fR.
-
-If no argument is given, the command is interpreted as \fBcd $HOME\fR.
-
-If the argument \fB-\fR is given, the command is interpreted as \fBcd $OLDPWD\fR.
-
-The environment variables \fBPWD\fR and \fBOLDPWD\fR are updated after a change of directory.
-.RE
-
+.SH SHELL BUILTIN COMMANDS
+This section lists some built-in commands, which are built-in because
+they are needed to perform some operations which cannot be performed
+by a different process.
+.TP
+\fBalias\fP [\fIname\fP[=\fI'value'\fP] ...]
+Running
 .B alias
-.RS
-Usage: \fBalias [NAME[='VALUE'] ...]\fR
+with no arguments prints the list of aliases in the form
+.I name=
+.I'value'
+. When arguments are supplied, an alias is defined for each
+.I name
+whose
+.I value
+is given. A trailing blank or control operator in
+.I value
+causes the next word to be checked for alias
+substitution when an alias is expanded. For each
+.I name
+in the argument list for which no
+.I value
+is supplied, the name and value of the alias is printed.
+.B Alias
+returns true unless a
+.I name
+is given for which no alias has been defined.
 
-Handles aliases.
+.TP
+\fBcd\fP [\fIdir\fP]
+Change the current directory to \fIdir\fP.
+If \fIdir\fP is not supplied, the value of the
+.SM
+.B HOME
+shell variable is the default.
+Any additional arguments following \fIdir\fP are ignored.
+An argument of
+.B \-
+switches
+.SM
+.B $OLDPWD
+with \fB$PWD\fP.
+If
+\fB\-\fP is the first argument, and the directory change is
+successful, the absolute pathname of the new working directory is
+written to the standard output.
+The return value is true if the directory was successfully changed;
+false otherwise.
 
-.I alias\fR: Prints a list of all aliases, one per line, in the form \fINAME='VALUE'\fR.
-
-.I alias NAME [NAME2 ...]\fR: Prints the aliases \fINAME\fR, \fINAME2\fR, etc. one per line, in the form \fINAME='VALUE'\fR.
-
-.I alias NAME='VALUE' [...]\fR: Defines an alias for each \fINAME\fR whose \fIVALUE\fR is given.
-If \fIname\fR is already an alias, its value is replaced with \fIVALUE\fR.
-.RE
-
-.B exit
-.RS
-Usage: \fBexit [STATUS]\fR
-
-Exits the shell.
-
-The \fBSTATUS\fR argument is the integer used to exit the shell.
-
-If no argument is given, the command is interpreted as \fBexit 0\fR.
-.RE
-
+.TP
 .B env
-.RS
-Usage: \fBenv\fR
+Prints all the environment variables in the shell.
 
-Prints the current environment.
-.RE
+.TP
+\fBexit\fP [\fIstatus\fP]
+Cause the shell to exit
+with a status code of \fIstatus\fP.  If
+.I status
+is omitted, the exit status
+is that of the last command executed.
 
-.B setenv
-.RS
-Usage: \fBsetenv [VARIABLE] [VALUE]\fR
+.TP
+\fBhelp\fP [\fIBUILTIN\fP]
+Prints the help page of a builtin command \fIstatus\fP. If
+no arguments are provided, a short information about the
+program and built-in commands usage syntax
+are printed.
+If
+.I BUILTIN
+is not a built-in command or there are too many arguments, the
+return value is false and an error message is printed to the
+standard error output.
 
-Initializes a new environment variable, or modifies an existing one.
+.TP
+\fBhistory\fP
+Displays all the lines of commands that have
+executed by the shell. Returns false if an argument is
+provided and prints some error to the standard error output.
 
-Upon failure, prints a message to \fBstderr\fR
-.RE
+.TP
+\fBsetenv\fP \fIVARIABLE\fP \fIVALUE\fP
+Sets the environment variable with the name \fIVARIABLE\fP
+to have the value \fIVALUE\fP
+If
+.I VARIABLE
+is not a valid variable or there are too many or insufficient
+arguments, the return value is false and an error message is
+printed to the standard error output.
 
-.B unsetenv
-.RS
-Usage: \fBunsetenv [VARIABLE]\fR
+.TP
+\fBunsetenv\fP \fIVARIABLE\fP
+Removes an environment variable with the name
+\fIVARIABLE\fP. No error is thrown if \fIVARIABLE\fP
+does not exist. Returns false if an argument isn't
+provided or there are too many arguments.
 
-Removes an environmental variable.
+.SH ENVIRONMENT
+.TP
+HOME
+This environment variable functions as the default argument for
+the cd builtin.
+.TP
+PATH
+The default serch path for executables.
+.TP
+PS1
+The primary prompt string, which defaults to "$ ".
+.TP
+PWD
+The logical value of the current working directory. This is set by
+the \fBcd\fP command.
+.TP
+OLDPWD
+The previous logical value of the current working directory. This is set by
+the \fBcd\fP command.
 
-Upon failure, prints a message to \fBstderr\fR.
-.RE
-.RE
-.in
+.SH FILES
+.PD 0
+.TP
+.I /bin/simple_shell
+The \fBsimple_shell\fP executable
+.TP
+.I $HOME/.simple_shell_history
+The \fBsimple_shell\fP history file
+.PD
+
+.SH AUTHORS
+Debs Utomi, ALX
+.br
+dinmavic01@gmail.com
+.PP
+Addisu Dabale Gonfa, ALX
+.br
+addisudabale21@gmail.com
 
 .SH SEE ALSO
-access(2), chdir(2), execve(2), _exit(2), exit(3), fflush(3), fork(2), free(3), isatty(3), getcwd(3), malloc(3), open(2), read(2), sh(1), signal(2), stat(2), wait(2), write(2)
+.PD 0
+.TP
+\fIsh\fP(1), \fIbash\fP(1), \fIksh\fP(1), \fIcsh\fP(1)
+.PD
 
-.B Shellby\fR emulates basic functionality of the \fBsh\fR shell.
-This man page borrows from the corresponding man pages sh(1) and dash(1)
