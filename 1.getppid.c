@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 /**
- * main - PID
+ * main - parent identification(PID)
  *
  * Return: Always 0.
  */

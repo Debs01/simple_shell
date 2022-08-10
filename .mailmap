@@ -1,0 +1,9 @@
+# Generate AUTHORS: hack/generate-authors.sh
+
+# Tip for finding duplicates (besides scanning the output of AUTHORS for name
+# duplicates that aren't also email duplicates): scan the output of:
+#   git log --format='%aE - %aN' | sort -uf
+#
+# For explanation on this file format: man git-shortlo
+Debs Utomi <dinmavic01@gmail.com> <https://github.com/Debs01>
+addisu Dabale <addisudabale21@gmail.com> <https://github.com/addisu30>
