@@ -22,17 +22,6 @@ int main(__attribute__((unused)) int argc, char **argv)
 			prompt();
 		input = _getline();
 		if (input[0] == '\0')
-			continue;
-		history(input);
-		/**
-		*if (commands[i + 1] == NULL)
-		*{
-		*free(commands);
-		*break;
-		*}
-		*/
-		commands = separator(input);
-		for (i = 0; commands[i] != NULL; i++)
 		{
 			cmd = parse_cmd(commands[i]);
 			if (_strcmp(cmd[0], "exit") == 0)
@@ -40,22 +29,9 @@ int main(__attribute__((unused)) int argc, char **argv)
 				free(commands);
 				exit_bul(cmd, input, argv, count, stat);
 			}
-			else if (check_builtin(cmd) == 0)
-			{
-			/**
-			*if (commands[i + 1] == NULL)
-			*{
-			*free(commands);
-			*break;
-			*}
-			*/
-				stat = handle_builtin(cmd, stat);
-				free(cmd);
-				continue;
-			}
 			else
 			{
-				stat = check_cmd(cmd, input, count, argv);
+		stat = check_cmd(cmd, input, count, argv);
 			}
 			/**
 			*if (commands[i + 1] == NULL)
