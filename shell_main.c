@@ -24,6 +24,13 @@ int main(__attribute__((unused)) int argc, char **argv)
 		if (input[0] == '\0')
 			continue;
 		history(input);
+		/**
+		*if (commands[i + 1] == NULL)
+		*{
+		*free(commands);
+		*break;
+		*}
+		*/
 		commands = separator(input);
 		for (i = 0; commands[i] != NULL; i++)
 		{
@@ -35,6 +42,13 @@ int main(__attribute__((unused)) int argc, char **argv)
 			}
 			else if (check_builtin(cmd) == 0)
 			{
+			/**
+			*if (commands[i + 1] == NULL)
+			*{
+			*free(commands);
+			*break;
+			*}
+			*/
 				stat = handle_builtin(cmd, stat);
 				free(cmd);
 				continue;
