@@ -43,7 +43,7 @@ int main(__attribute__((unused)) int argc, char **argv)
 			{
 				stat = check_cmd(cmd, input, count, argv);
 			}
-			/*
+			/**
 			*if (commands[i + 1] == NULL)
 			*{
 			*free(commands);
