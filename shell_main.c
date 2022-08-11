@@ -1,5 +1,4 @@
 #include "shell.h"
-
 /**
  * main - Entry point to program
  * @argc: Argument count
@@ -44,11 +43,13 @@ int main(__attribute__((unused)) int argc, char **argv)
 			{
 				stat = check_cmd(cmd, input, count, argv);
 			}
-			/*if (commands[i + 1] == NULL)
-			{
-				free(commands);
-				break;
-			}*/
+			/*
+			*if (commands[i + 1] == NULL)
+			*{
+			*free(commands);
+			*break;
+			*}
+			*/
 			free(cmd);
 		}
 		free(input);
